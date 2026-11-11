@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>자음 · 한글의 과학과 철학</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/consonant.css">
+</head>
+<body data-view="penta">
+  <!-- ㄱ 나무: 화면 아래 가운데의 ㄱ 에서 ㅋ·ㄲ 이 나무처럼 자라 피어난다 -->
+  <canvas id="tree" role="img"
+          aria-label="맨 아래의 ㄱ 에서 ㅋ 과 ㄲ 이 나무처럼 자라는 그림. 화면을 누르거나 스페이스 키를 누르면 한 마디씩 자랍니다."></canvas>
+
+  <!-- 첫 화면: 오각형 다섯 칸에 ㄱ ㄴ ㅁ ㅅ ㅇ. 지금은 ㄱ 만 열림 (칸은 js/penta.js 가 그림) -->
+  <section class="penta" id="penta" aria-label="다섯 기본 자음">
+    <svg class="penta-svg" viewBox="-100 -100 200 200"></svg>
+  </section>
+
+  <!-- 나무 화면에서 오각형으로 돌아가기 -->
+  <button class="to-penta" id="to-penta" type="button" aria-label="오각형으로 돌아가기">
+    <svg viewBox="-12 -12 24 24" aria-hidden="true">
+      <path d="M0 -10 L9.51 -3.09 L5.88 8.09 L-5.88 8.09 L-9.51 -3.09 Z"
+            fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <p class="sr-only" id="live" aria-live="polite"></p>
+
+  <script src="js/consonant.js"></script>
+  <script src="js/penta.js"></script>
+</body>
+</html>

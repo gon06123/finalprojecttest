@@ -1,0 +1,119 @@
+/* ===== 01 자음 페이지 ===== */
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+body[data-view="penta"] { cursor: default; }
+
+/* 나무는 화면 전체 캔버스에 그림 (배경은 body 의 흰색) */
+#tree {
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+body[data-view="penta"] #tree { visibility: hidden; }
+
+/* ---------- 첫 화면: 화면 아래로 잘린 커다란 오각형 원판 ---------- */
+.penta {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  background: var(--bg);
+  cursor: grab;
+}
+.penta.is-dragging { cursor: grabbing; }
+body[data-view="tree"] .penta { visibility: hidden; }
+
+/* 크기와 자리는 js/penta.js 가 화면에 맞춰 정함 (원판 중심 = 화면 아래 가장자리 조금 밑) */
+.penta-svg {
+  position: absolute;
+  overflow: visible;
+  color: var(--fg);
+  touch-action: none;
+  outline: none;
+}
+
+.penta-art { transition: opacity .45s ease; }
+.penta.is-dim .penta-art { opacity: 0; }
+
+/* 원판 회전: 놓으면 가장 가까운 칸이 위로 오며 살짝 튕김 */
+.wheel {
+  transform-box: view-box;
+  transform-origin: 0 0; /* viewBox 의 (0,0) = 오각형 중심 */
+  transform: rotate(var(--rot, 0deg));
+  transition: transform .6s var(--ease-spring);
+}
+.penta.is-dragging .wheel { transition: none; }
+
+.edge {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.divider {
+  stroke: currentColor;
+  stroke-opacity: .25;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.cell-bg { fill: transparent; transition: fill .25s; }
+/* 맨 위에 온 칸이 고른 칸. ㄱ 이 위에 있을 때만 눌러서 열 수 있음 */
+.cell.is-open.is-top { cursor: pointer; }
+.penta:not(.is-dragging) .cell.is-open.is-top:hover .cell-bg,
+.penta-svg:focus-visible .cell.is-top .cell-bg { fill: var(--surface); }
+
+.letter {
+  fill: none;
+  stroke: currentColor;
+  stroke-linejoin: miter;
+}
+.cell.is-locked .letter { opacity: .25; } /* 아직 비어 있는 칸 */
+.cell.is-flying .letter { visibility: hidden; }
+
+/* 칸의 ㄱ 이 나무 뿌리 자리로 날아가는 동안 쓰는 층 */
+.flight {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  color: var(--fg);
+}
+
+/* ---------- 나무 화면: 왼쪽 위 오각형 버튼 ---------- */
+.to-penta {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 4;
+  display: none;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--fg);
+  opacity: .5;
+  cursor: pointer;
+  transition: opacity .2s;
+}
+.to-penta svg { display: block; width: 100%; height: 100%; }
+.to-penta:hover,
+.to-penta:focus-visible { opacity: 1; }
+.to-penta:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+body[data-view="tree"] .to-penta { display: block; }

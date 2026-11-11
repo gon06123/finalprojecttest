@@ -1,0 +1,196 @@
+/* ===== 02 모음 페이지 ===== */
+
+/* 음(陰)이 되면 화면 전체가 검게 반전 */
+body[data-polarity="yin"] {
+  --bg: var(--black);
+  --fg: var(--off-white);
+  --line: var(--gray-8);
+  --surface: var(--gray-9);
+}
+
+body[data-drag] { cursor: grabbing; }
+
+/* ---------- 오른쪽 위: 음양 표시 ---------- */
+.pol-badge {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.pol-icon { position: relative; width: 24px; height: 24px; }
+.pol-icon svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity .5s, transform .6s var(--ease-spring);
+}
+.i-moon { opacity: 0; transform: rotate(-60deg) scale(.6); }
+body[data-polarity="yin"] .i-sun { opacity: 0; transform: rotate(60deg) scale(.6); }
+body[data-polarity="yin"] .i-moon { opacity: 1; transform: none; }
+
+/* ---------- 상단: 삼각형 다이얼 ---------- */
+.page {
+  max-width: none;
+  padding: 20px 16px 0;
+  display: flex;
+  justify-content: center;
+}
+@media (max-width: 560px) {
+  .page { padding-top: 52px; } /* 오른쪽 위 표시와 겹치지 않게 */
+}
+
+.dial {
+  position: relative;
+  z-index: 2;
+  width: 120px;
+  aspect-ratio: 1;
+  container-type: inline-size;
+  border-radius: 50%;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+.dial:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg) 20%, transparent);
+}
+
+.dial-tri {
+  position: absolute;
+  inset: 34%;
+  color: var(--fg);
+  transform: rotate(var(--angle, 0deg));
+  transition: transform .5s var(--ease-spring), color .6s;
+}
+body[data-drag="dial"] .dial-tri { transition: transform .05s linear, color .6s; }
+body[data-drag="glyph"] .dial-tri { transition: transform .18s ease-out, color .6s; }
+.dial-tri svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+/* 처음 만지기 전까지 '잡을 수 있다'는 신호 */
+body:not(.touched) .dial-tri svg { animation: beckon 1.8s ease-in-out infinite; }
+@keyframes beckon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+.dial-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--muted);
+  opacity: .7;
+  transform: translate(-50%, -50%) rotate(var(--a)) translateX(40cqw) rotate(calc(-1 * var(--a)));
+  transition: color .4s, opacity .4s;
+  pointer-events: none;
+}
+.dial-label.is-active { color: var(--fg); opacity: 1; font-weight: 700; }
+
+/* ---------- 화면 중앙: 회전하는 작대기 ---------- */
+.glyph-area {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* 안쪽 크기는 모두 cqw(글자 판 너비 기준) */
+.glyph {
+  position: relative;
+  width: min(440px, 82vw, calc(100vh - 260px));
+  width: min(440px, 82vw, calc(100svh - 260px));
+  aspect-ratio: 1;
+  container-type: inline-size;
+  border-radius: 50%; /* 잡을 수 있는 영역을 원으로 */
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  filter: url(#goo); /* 획이 작대기에 녹아 붙는 접합부 */
+  transform: rotate(var(--angle, 0deg));
+  transition: transform .6s var(--ease-spring);
+}
+
+.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+body[data-drag="dial"] .glyph { transition: transform .18s ease-out; } /* 삼각형을 살짝 늦게 따라옴 */
+body[data-drag="glyph"] .glyph { transition: transform .05s linear; } /* 직접 잡으면 손을 바로 따라옴 */
+
+/* 작대기: 사람(ㅣ) — 90° 돌면 땅(ㅡ) */
+.long {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6.4cqw;
+  height: 62cqw;
+  margin: -31cqw 0 0 -3.2cqw;
+  border-radius: 1.6cqw;
+  background: var(--fg);
+  transition: background-color .6s;
+}
+
+/* 짧은 획 — 작대기 한가운데서부터 오른쪽으로 뻗어 나온 모양(겹쳐서 틈이 없음).
+   --y 는 위아래 위치(ㅑ 일 때 벌어짐) */
+.mark {
+  --y: 0cqw;
+  --ease-liquid: cubic-bezier(.22, 1, .36, 1);
+  position: absolute;
+  left: 50%;
+  top: calc(50% - 3.2cqw + var(--y));
+  width: 24.2cqw;
+  height: 6.4cqw;
+  border-radius: 0 1.6cqw 1.6cqw 0;
+  background: var(--fg);
+  transition:
+    left .75s var(--ease-liquid),
+    top .6s var(--ease-spring),
+    width .75s var(--ease-liquid),
+    height .6s var(--ease-liquid),
+    border-radius .5s ease,
+    background-color .6s;
+}
+.mark[data-state="none"] { display: none; }
+/* 날아온 점이 막 내려앉은 순간: 작대기 옆의 둥근 점 */
+.mark[data-state="dot"] {
+  left: calc(50% + 9cqw);
+  top: calc(50% - 5cqw + var(--y));
+  width: 10cqw;
+  height: 10cqw;
+  border-radius: 50%;
+}
+.mark.no-anim { transition: none; }
+
+/* 점이 두 개가 되면(ㅑ) 첫 획은 위로, 둘째 획은 아래로 */
+.glyph[data-count="2"] .mark-a { --y: -9cqw; }
+.glyph[data-count="2"] .mark-b { --y: 9cqw; }
+
+/* ---------- 배경 클릭 시 나타나 날아가는 점 ---------- */
+.flyer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: var(--size);
+  height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  border-radius: 50%;
+  background: var(--fg);
+  pointer-events: none;
+  animation: pop .4s var(--ease-spring) both;
+}
+@keyframes pop {
+  from { scale: 0; }
+  to { scale: 1; }
+}
